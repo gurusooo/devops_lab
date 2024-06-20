@@ -3,14 +3,14 @@ name: Auto Release
 on:
   push:
     tags:
-      - 'v*.*'
+      - 'v*.*' #воркфлоу запускается при пуше тегов по шаблону
 
 jobs:
   release:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout code #клонирование чекаут репозитория
     - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,29 +21,29 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
+        python -m pip install flake8 pytest #это установка утилиты для поиска ошибок, из другого файла)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Build binary with PyInstaller
+    - name: Build binary with PyInstaller #сборка бинарного файла
       run: |
-        pyinstaller --onefile main.py
+        pyinstaller --onefile main.py #создаём исполняемый файл с флагом для сборки в один файл
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Create Release #создаём релиз на гитхаб
+      id: create_release #идентификатор шага
+      uses: actions/create-release@v1 #экшн для релиза
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} #токен для аутентификации
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: Release ${{ github.ref }} #имя тега для релиза и его названия
         draft: false
-        prerelease: false
+        prerelease: false #релиз не черновик и не предварительный
 
-    - name: Upload Release Asset
+    - name: Upload Release Asset #загрузка артефакта релиза (набор файлов, создающийся в процессе сборки как часть релиза)
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/main
-        asset_name: main
-        asset_content_type: application/octet-stream
+        upload_url: ${{ steps.create_release.outputs.upload_url }} #url для загрузки артефактов из шага создания релиза
+        asset_path: ./release/main #путь к собранному файлу
+        asset_name: main #имя файла под которым артефакт будет загружен
+        asset_content_type: application/octet-stream #тип носителя файла (файл двоичный)
